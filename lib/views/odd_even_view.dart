@@ -1,5 +1,6 @@
 // lib/views/odd_even_view.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/big_decimal.dart';
 
 class ViewGanjilGenap extends StatefulWidget {
@@ -22,7 +23,7 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
     if (input.isEmpty) {
       setState(() {
         _status = 'Harap masukkan bilangan terlebih dahulu.';
-        _statusColor = Colors.grey;
+        _statusColor = Colors.red;
         _hasResult = false;
       });
       return;
@@ -41,7 +42,7 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
     if (!dec.isInteger) {
       setState(() {
         _status = 'Angka adalah desimal (Ganjil/Genap hanya berlaku untuk bilangan bulat).';
-        _statusColor = Colors.orange;
+        _statusColor = Colors.red;
         _hasResult = false;
       });
       return;
@@ -114,6 +115,9 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
                         controller: _angkaCtrl,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9\-]')),
+                        ],
                         onSubmitted: (_) => _cekAngka(),
                         decoration: const InputDecoration(
                           labelText: 'Masukkan Bilangan Bulat',
@@ -149,38 +153,70 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
                 const SizedBox(height: 20),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  child: Card(
-                    color: _hasResult
-                        ? (_isGenap
-                            ? (isDark ? Colors.teal.shade900.withValues(alpha: 0.4) : Colors.teal.shade50)
-                            : (isDark ? Colors.blue.shade900.withValues(alpha: 0.4) : Colors.blue.shade50))
-                        : (isDark ? Colors.grey.shade800 : Colors.grey.shade100),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Icon(
-                            _hasResult
-                                ? (_isGenap ? Icons.check_circle_outline : Icons.info_outline)
-                                : Icons.warning_amber_rounded,
-                            size: 40,
-                            color: _statusColor,
-                          ),
-                          const SizedBox(height: 12),
-                          SelectableText(
-                            _status,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              height: 1.4,
-                              color: _statusColor,
+                  child: _hasResult
+                      ? Card(
+                          color: _isGenap
+                              ? (isDark ? Colors.teal.shade900.withValues(alpha: 0.4) : Colors.teal.shade50)
+                              : (isDark ? Colors.blue.shade900.withValues(alpha: 0.4) : Colors.blue.shade50),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  _isGenap ? Icons.check_circle_outline : Icons.info_outline,
+                                  size: 40,
+                                  color: _statusColor,
+                                ),
+                                const SizedBox(height: 12),
+                                SelectableText(
+                                  _status,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.4,
+                                    color: _statusColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        )
+                      : Card(
+                          color: isDark ? Colors.red.shade900.withValues(alpha: 0.4) : Colors.red.shade50,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.error_outline, color: isDark ? Colors.red.shade300 : Colors.red.shade700),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Input Tidak Valid',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: isDark ? Colors.red.shade300 : Colors.red.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(height: 24),
+                                Text(
+                                  _status,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.red.shade200 : Colors.red.shade900,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ],
@@ -190,3 +226,4 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
     );
   }
 }
+

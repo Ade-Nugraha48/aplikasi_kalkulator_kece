@@ -145,6 +145,9 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
                         controller: _inputCtrl,
                         onChanged: _hitungRealtime,
                         keyboardType: TextInputType.text,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9\+\-\*\/\.\(\)\s]')),
+                        ],
                         decoration: InputDecoration(
                           hintText: 'Contoh: 1000 + 500 * (2 - 1)',
                           labelText: 'Masukkan Ekspresi',
@@ -182,65 +185,94 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
               if (_hasilPreview.isNotEmpty) ...[
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  child: Card(
-                    color: _isError
-                        ? (isDark ? Colors.red.shade900.withValues(alpha: 0.4) : Colors.red.shade50)
-                        : (isDark ? Colors.indigo.shade900.withValues(alpha: 0.4) : theme.colorScheme.primaryContainer),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                _isError ? 'Status Error:' : 'Hasil Kalkulasi:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: _isError
-                                      ? Colors.red.shade700
-                                      : (isDark ? Colors.purpleAccent : theme.colorScheme.primary),
+                  child: _isError
+                      ? Card(
+                          color: isDark ? Colors.red.shade900.withValues(alpha: 0.4) : Colors.red.shade50,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.error_outline, color: isDark ? Colors.red.shade300 : Colors.red.shade700),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Input Tidak Valid',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: isDark ? Colors.red.shade300 : Colors.red.shade700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              if (!_isError)
-                                InkWell(
-                                  onTap: _salinHasil,
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.copy, size: 14),
-                                        SizedBox(width: 4),
-                                        Text('Salin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
+                                const Divider(height: 24),
+                                SelectableText(
+                                  _hasilPreview,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark ? Colors.red.shade200 : Colors.red.shade900,
+                                    height: 1.4,
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          SelectableText(
-                            _hasilPreview,
-                            style: TextStyle(
-                              fontSize: _hasilPreview.length > 30 ? 18 : 26,
-                              fontWeight: FontWeight.bold,
-                              height: 1.3,
-                              color: _isError
-                                  ? Colors.red
-                                  : (isDark ? Colors.white : Colors.deepPurple.shade900),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        )
+                      : Card(
+                          color: isDark ? Colors.indigo.shade900.withValues(alpha: 0.4) : theme.colorScheme.primaryContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Hasil Kalkulasi:',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: isDark ? Colors.purpleAccent : theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: _salinHasil,
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: const Row(
+                                          children: [
+                                            Icon(Icons.copy, size: 14),
+                                            SizedBox(width: 4),
+                                            Text('Salin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                SelectableText(
+                                  _hasilPreview,
+                                  style: TextStyle(
+                                    fontSize: _hasilPreview.length > 30 ? 18 : 26,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.3,
+                                    color: isDark ? Colors.white : Colors.deepPurple.shade900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 16),
               ],

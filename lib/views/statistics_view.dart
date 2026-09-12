@@ -1,5 +1,6 @@
 // lib/views/statistics_view.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/big_decimal.dart';
 
 class ViewTotalAngka extends StatefulWidget {
@@ -12,6 +13,7 @@ class ViewTotalAngka extends StatefulWidget {
 class _ViewTotalAngkaState extends State<ViewTotalAngka> {
   final _deretCtrl = TextEditingController();
   String _hasilAnalisis = '';
+  String _errorMessage = '';
   int _totalValidCount = 0;
   String _sumVal = '';
   String _avgVal = '';
@@ -22,21 +24,44 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
   void _hitungStatistik() {
     FocusScope.of(context).unfocus();
     String input = _deretCtrl.text.trim();
-    if (input.isEmpty) return;
+    if (input.isEmpty) {
+      setState(() {
+        _hasResult = false;
+        _errorMessage = 'Harap masukkan deret angka terlebih dahulu.';
+        _hasilAnalisis = '';
+      });
+      return;
+    }
 
     List<String> rawTokens = input.split(RegExp(r'[\s,]+'));
     List<BigDecimal> validNumbers = [];
+    List<String> invalidTokens = [];
 
     for (String item in rawTokens) {
       if (item.isEmpty) continue;
       BigDecimal? num = BigDecimal.tryParse(item);
-      if (num != null) validNumbers.add(num);
+      if (num != null) {
+        validNumbers.add(num);
+      } else {
+        invalidTokens.add(item);
+      }
+    }
+
+    if (invalidTokens.isNotEmpty) {
+      setState(() {
+        _hasResult = false;
+        _errorMessage =
+            'Input mengandung data yang bukan angka valid:\n"${invalidTokens.join(', ')}"\n\nHanya angka yang diperbolehkan (pisahkan dengan spasi atau koma).';
+        _hasilAnalisis = '';
+      });
+      return;
     }
 
     if (validNumbers.isEmpty) {
       setState(() {
         _hasResult = false;
-        _hasilAnalisis = 'Tidak ada angka valid yang dimasukkan.';
+        _errorMessage = 'Tidak ada angka valid yang dimasukkan.';
+        _hasilAnalisis = '';
       });
       return;
     }
@@ -56,6 +81,7 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
 
     setState(() {
       _hasResult = true;
+      _errorMessage = '';
       _totalValidCount = validNumbers.length;
       _sumVal = total.toFormattedString();
       _avgVal = average.toFormattedString();
@@ -132,6 +158,9 @@ Nilai Terbesar     : $_maxVal
                       TextField(
                         controller: _deretCtrl,
                         maxLines: 4,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9\s,\.\-]')),
+                        ],
                         decoration: const InputDecoration(
                           hintText: 'Ketik deret angka dipisahkan spasi atau koma\n\nContoh: 1000 5000 2500 1000000000',
                           alignLabelWithHint: true,
@@ -152,41 +181,70 @@ Nilai Terbesar     : $_maxVal
                 ),
               ),
               const SizedBox(height: 16),
-              if (_hasilAnalisis.isNotEmpty) ...[
-                if (_hasResult) ...[
-                  Card(
-                    color: isDark ? Colors.teal.shade900.withValues(alpha: 0.3) : Colors.teal.shade50,
+              if (_hasResult) ...[
+                Card(
+                  color: isDark ? Colors.teal.shade900.withValues(alpha: 0.3) : Colors.teal.shade50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.assessment, color: Colors.teal),
+                            SizedBox(width: 8),
+                            Text('Hasil Ringkasan Statistik', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.teal)),
+                          ],
+                        ),
+                        const Divider(height: 24),
+                        _buildStatRow('Banyak Angka Valid', '$_totalValidCount data'),
+                        _buildStatRow('Total Penjumlahan', _sumVal),
+                        _buildStatRow('Rata-Rata (Average)', _avgVal),
+                        _buildStatRow('Nilai Terkecil (Min)', _minVal),
+                        _buildStatRow('Nilai Terbesar (Max)', _maxVal),
+                      ],
+                    ),
+                  ),
+                ),
+              ] else if (_errorMessage.isNotEmpty) ...[
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  child: Card(
+                    color: isDark ? Colors.red.shade900.withValues(alpha: 0.4) : Colors.red.shade50,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.assessment, color: Colors.teal),
-                              SizedBox(width: 8),
-                              Text('Hasil Ringkasan Statistik', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.teal)),
+                              Icon(Icons.error_outline, color: isDark ? Colors.red.shade300 : Colors.red.shade700),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Input Tidak Valid',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: isDark ? Colors.red.shade300 : Colors.red.shade700,
+                                ),
+                              ),
                             ],
                           ),
                           const Divider(height: 24),
-                          _buildStatRow('Banyak Angka Valid', '$_totalValidCount data'),
-                          _buildStatRow('Total Penjumlahan', _sumVal),
-                          _buildStatRow('Rata-Rata (Average)', _avgVal),
-                          _buildStatRow('Nilai Terkecil (Min)', _minVal),
-                          _buildStatRow('Nilai Terbesar (Max)', _maxVal),
+                          Text(
+                            _errorMessage,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? Colors.red.shade200 : Colors.red.shade900,
+                              height: 1.4,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
-                ] else ...[
-                  Card(
-                    color: Colors.amber.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(_hasilAnalisis, style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                ),
               ],
             ],
           ),
@@ -221,3 +279,4 @@ Nilai Terbesar     : $_maxVal
     );
   }
 }
+

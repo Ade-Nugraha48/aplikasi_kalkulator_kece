@@ -131,20 +131,24 @@ class _HalamanLoginState extends State<HalamanLogin> {
                         if (_pesanError.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.1),
+                              color: isDark ? Colors.red.shade900.withValues(alpha: 0.4) : Colors.red.shade50,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                              border: Border.all(color: isDark ? Colors.red.shade700 : Colors.red.shade300),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                                Icon(Icons.error_outline, color: isDark ? Colors.red.shade300 : Colors.red.shade700, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     _pesanError,
-                                    style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: isDark ? Colors.red.shade200 : Colors.red.shade900,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
