@@ -141,9 +141,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 28),
                   ElevatedButton(
-                    onPressed: _prosesRegister,
+                    onPressed: _isLoading ? null : _prosesRegister,
                     style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                    child: const Text('DAFTAR SEKARANG'),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                          )
+                        : const Text('DAFTAR SEKARANG'),
                   ),
                 ],
               ),

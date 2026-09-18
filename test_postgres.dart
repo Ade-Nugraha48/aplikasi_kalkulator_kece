@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:postgres/postgres.dart';
 
 void main() async {
