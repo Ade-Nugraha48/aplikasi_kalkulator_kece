@@ -1,7 +1,7 @@
 // test/big_decimal_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aplikasi_kalkulator_kece/models/big_decimal.dart';
-import 'package:aplikasi_kalkulator_kece/services/calculator_service.dart';
+import 'package:aplikasi_kalkulator_kece/features/calculator_t1/logic/big_decimal.dart';
+import 'package:aplikasi_kalkulator_kece/features/calculator_t1/logic/calculator_service.dart';
 
 void main() {
   group('BigDecimal High Precision Tests', () {

@@ -1,4 +1,5 @@
 // lib/models/team_member.dart
+// Backward compatibility model export
 
 class TeamMember {
   final String nama;

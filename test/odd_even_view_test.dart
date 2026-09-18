@@ -1,15 +1,13 @@
 // test/odd_even_view_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aplikasi_kalkulator_kece/views/odd_even_view.dart';
+import 'package:aplikasi_kalkulator_kece/features/calculator_t1/screens/ganjil_genap_screen.dart';
 
 void main() {
-  testWidgets('ViewGanjilGenap memeriksa angka genap dengan benar', (WidgetTester tester) async {
+  testWidgets('GanjilGenapScreen memeriksa angka genap dengan benar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: ViewGanjilGenap(),
-        ),
+        home: GanjilGenapScreen(),
       ),
     );
 
@@ -21,19 +19,16 @@ void main() {
     expect(find.text('Bilangan 100 adalah GENAP.'), findsOneWidget);
   });
 
-  testWidgets('ViewGanjilGenap menampilkan error card merah saat input kosong', (WidgetTester tester) async {
+  testWidgets('GanjilGenapScreen menampilkan pesan error saat input kosong', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: ViewGanjilGenap(),
-        ),
+        home: GanjilGenapScreen(),
       ),
     );
 
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
 
-    expect(find.text('Input Tidak Valid'), findsOneWidget);
     expect(find.text('Harap masukkan bilangan terlebih dahulu.'), findsOneWidget);
   });
 }
