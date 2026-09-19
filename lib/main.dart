@@ -1,8 +1,9 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/database/database_helper.dart';
+import 'core/database/supabase_config.dart';
 import 'core/session/session_manager.dart';
 import 'core/session/session_listener.dart';
 import 'features/auth/views/login_view.dart';
@@ -21,7 +22,18 @@ export 'features/team/views/team_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inisialisasi Database PostgreSQL (non-blocking)
+  // Inisialisasi Supabase Online Cloud Database
+  await SupabaseConfig.loadConfig();
+  try {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
+  } catch (e) {
+    debugPrint('⚠️ Supabase Initialize Warning: $e');
+  }
+
+  // Inisialisasi Database PostgreSQL (non-blocking fallback)
   DatabaseHelper().initDatabase();
 
   // Inisialisasi Persistent Session dari SharedPreferences

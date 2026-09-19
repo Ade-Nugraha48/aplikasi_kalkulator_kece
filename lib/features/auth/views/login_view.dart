@@ -1,15 +1,16 @@
 /// ============================================================================
 /// FILE: lib/features/auth/views/login_view.dart
-/// FUNGSI: Tampilan Halaman Login Pengguna & Tool Diagnosa/Setting Database PostgreSQL.
-/// MANAJEMEN HANDLES: FR-U-01 (Tampilan & Form Login Pengguna ke PostgreSQL)
-/// LOKASI LOGIC: Input Username & Password, validasi Kredensial PostgreSQL,
-///               penyimpanan Session (FR-U-06), & Dialog Setting/Tes Koneksi DB.
+/// FUNGSI: Tampilan Halaman Login Pengguna & Tool Diagnosa/Setting Database Supabase & PostgreSQL.
+/// MANAJEMEN HANDLES: FR-U-01 (Tampilan & Form Login Pengguna)
+/// LOKASI LOGIC: Input Username & Password, validasi Kredensial Supabase/PostgreSQL,
+///               penyimpanan Session (FR-U-06), & Dialog Setting/Tes Koneksi Database.
 /// ============================================================================
 
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../../../core/database/database_config.dart';
 import '../../../core/database/database_helper.dart';
+import '../../../core/database/supabase_config.dart';
 import '../../../core/session/session_manager.dart';
 import '../../main_navigation/views/main_navigation_view.dart';
 import 'register_view.dart';
@@ -78,6 +79,10 @@ class _LoginViewState extends State<LoginView> {
 
   void _bukaModalPengaturanDatabase() async {
     await DatabaseConfig.loadConfig();
+    await SupabaseConfig.loadConfig();
+
+    final supabaseUrlCtrl = TextEditingController(text: SupabaseConfig.url);
+    final supabaseAnonKeyCtrl = TextEditingController(text: SupabaseConfig.anonKey);
 
     final hostCtrl = TextEditingController(text: DatabaseConfig.host);
     final portCtrl = TextEditingController(text: DatabaseConfig.port.toString());
@@ -94,7 +99,8 @@ class _LoginViewState extends State<LoginView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (modalContext) {
-        bool testing = false;
+        bool testingSupabase = false;
+        bool testingLocal = false;
         String? testMessage;
         bool? testSuccess;
 
@@ -114,60 +120,204 @@ class _LoginViewState extends State<LoginView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.settings_input_component, color: Color(0xFF6C5CE7)),
+                        const Icon(Icons.cloud_sync, color: Color(0xFF6C5CE7), size: 28),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Pengaturan Koneksi PostgreSQL',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        const Expanded(
+                          child: Text(
+                            'Pengaturan Koneksi Database',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Ubah IP Host atau Password PostgreSQL sesuai konfigurasi pgAdmin 4 di laptop Anda.',
+                      'Kelola Kredensial Supabase Cloud (Rekomendasi Web/Chrome) & PostgreSQL Local.',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: hostCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Host IP Address',
-                        hintText: '10.0.2.2 (Emulator) / 127.0.0.1 / IP LAN',
-                        prefixIcon: Icon(Icons.computer),
+                    const SizedBox(height: 20),
+
+                    // SECTION 1: SUPABASE CLOUD
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6C5CE7).withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF6C5CE7).withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.bolt, color: Color(0xFF6C5CE7)),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'ONLINE SUPABASE CLOUD (Cloud PostgreSQL)',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF6C5CE7)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: supabaseUrlCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'SUPABASE URL',
+                              hintText: 'https://xyz.supabase.co',
+                              prefixIcon: Icon(Icons.link),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: supabaseAnonKeyCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'SUPABASE ANON KEY (Public Key)',
+                              hintText: 'eyJhbGciOi...',
+                              prefixIcon: Icon(Icons.key),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 44,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF6C5CE7),
+                                foregroundColor: Colors.white,
+                              ),
+                              icon: testingSupabase
+                                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : const Icon(Icons.cloud_done),
+                              label: Text(testingSupabase ? 'Menguji Supabase...' : 'TES & SIMPAN KONEKSI SUPABASE'),
+                              onPressed: (testingSupabase || testingLocal)
+                                  ? null
+                                  : () async {
+                                      setModalState(() {
+                                        testingSupabase = true;
+                                        testMessage = null;
+                                      });
+
+                                      try {
+                                        final ok = await SupabaseConfig.testConnection(
+                                          testUrl: supabaseUrlCtrl.text,
+                                          testAnonKey: supabaseAnonKeyCtrl.text,
+                                        );
+                                        await SupabaseConfig.saveConfig(
+                                          url: supabaseUrlCtrl.text,
+                                          anonKey: supabaseAnonKeyCtrl.text,
+                                        );
+
+                                        setModalState(() {
+                                          testingSupabase = false;
+                                          testSuccess = ok;
+                                          testMessage = '✅ KONEKSI SUPABASE BERHASIL! Cloud PostgreSQL terhubung.';
+                                        });
+                                      } catch (e) {
+                                        setModalState(() {
+                                          testingSupabase = false;
+                                          testSuccess = false;
+                                          testMessage = '❌ GAGAL KONEKSI SUPABASE: $e';
+                                        });
+                                      }
+                                    },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
+
+                    const SizedBox(height: 20),
+
+                    // SECTION 2: LOCAL POSTGRESQL (FALLBACK)
+                    ExpansionTile(
+                      title: const Text(
+                        'Konfigurasi PostgreSQL Local (Desktop/Android Fallback)',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      leading: const Icon(Icons.storage_rounded),
+                      childrenPadding: const EdgeInsets.only(top: 8, bottom: 8),
                       children: [
-                        Expanded(
-                          flex: 1,
-                          child: TextField(
-                            controller: portCtrl,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'Port', prefixIcon: Icon(Icons.numbers)),
+                        TextField(
+                          controller: hostCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Host IP Address',
+                            hintText: '127.0.0.1 / 10.0.2.2',
+                            prefixIcon: Icon(Icons.computer),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: TextField(
-                            controller: dbCtrl,
-                            decoration: const InputDecoration(labelText: 'Database', prefixIcon: Icon(Icons.storage)),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: TextField(
+                                controller: portCtrl,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(labelText: 'Port', prefixIcon: Icon(Icons.numbers)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: TextField(
+                                controller: dbCtrl,
+                                decoration: const InputDecoration(labelText: 'Database', prefixIcon: Icon(Icons.storage)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: userCtrl,
+                          decoration: const InputDecoration(labelText: 'PostgreSQL User', prefixIcon: Icon(Icons.person_outline)),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: passCtrl,
+                          obscureText: true,
+                          decoration: const InputDecoration(labelText: 'PostgreSQL Password', prefixIcon: Icon(Icons.key)),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 44,
+                          child: OutlinedButton.icon(
+                            icon: testingLocal
+                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.network_check),
+                            label: Text(testingLocal ? 'Menguji Local DB...' : 'TES KONEKSI LOCAL POSTGRESQL'),
+                            onPressed: (testingSupabase || testingLocal)
+                                ? null
+                                : () async {
+                                    setModalState(() {
+                                      testingLocal = true;
+                                      testMessage = null;
+                                    });
+
+                                    final port = int.tryParse(portCtrl.text.trim()) ?? 5432;
+                                    await DatabaseConfig.saveConfig(
+                                      host: hostCtrl.text.trim(),
+                                      port: port,
+                                      dbName: dbCtrl.text.trim(),
+                                      user: userCtrl.text.trim(),
+                                      pass: passCtrl.text,
+                                    );
+
+                                    final success = await DatabaseHelper().initDatabase();
+
+                                    setModalState(() {
+                                      testingLocal = false;
+                                      testSuccess = success;
+                                      if (success) {
+                                        testMessage = '✅ KONEKSI LOCAL BERHASIL! Database "${DatabaseConfig.databaseName}" terhubung di ${DatabaseConfig.host}:${DatabaseConfig.port}';
+                                      } else {
+                                        testMessage = '❌ GAGAL LOCAL: ${DatabaseHelper().lastErrorDetail}';
+                                      }
+                                    });
+                                  },
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: userCtrl,
-                      decoration: const InputDecoration(labelText: 'PostgreSQL User', prefixIcon: Icon(Icons.person_outline)),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: passCtrl,
-                      obscureText: true,
-                      decoration: const InputDecoration(labelText: 'PostgreSQL Password', prefixIcon: Icon(Icons.key)),
-                    ),
+
                     const SizedBox(height: 16),
                     if (testMessage != null) ...[
                       Container(
@@ -190,44 +340,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 16),
                     ],
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        icon: testing
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Icon(Icons.network_check),
-                        label: Text(testing ? 'Menguji...' : 'TES & SIMPAN KONEKSI'),
-                        onPressed: testing
-                            ? null
-                            : () async {
-                                setModalState(() {
-                                  testing = true;
-                                  testMessage = null;
-                                });
-
-                                final port = int.tryParse(portCtrl.text.trim()) ?? 5432;
-                                await DatabaseConfig.saveConfig(
-                                  host: hostCtrl.text.trim(),
-                                  port: port,
-                                  dbName: dbCtrl.text.trim(),
-                                  user: userCtrl.text.trim(),
-                                  pass: passCtrl.text,
-                                );
-
-                                final success = await DatabaseHelper().initDatabase();
-
-                                setModalState(() {
-                                  testing = false;
-                                  testSuccess = success;
-                                  if (success) {
-                                    testMessage = '✅ KONEKSI BERHASIL! Database "${DatabaseConfig.databaseName}" terhubung di ${DatabaseConfig.host}:${DatabaseConfig.port}';
-                                  } else {
-                                    testMessage = '❌ GAGAL: ${DatabaseHelper().lastErrorDetail}';
-                                  }
-                                });
-                              },
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -253,7 +365,7 @@ class _LoginViewState extends State<LoginView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_ethernet),
-            tooltip: 'Pengaturan & Tes Database PostgreSQL',
+            tooltip: 'Pengaturan Koneksi Supabase & Database',
             onPressed: _bukaModalPengaturanDatabase,
           ),
         ],
@@ -281,7 +393,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Silakan masuk dengan akun PostgreSQL Anda',
+                        'Silakan masuk dengan akun Anda (Supabase Cloud DB)',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),

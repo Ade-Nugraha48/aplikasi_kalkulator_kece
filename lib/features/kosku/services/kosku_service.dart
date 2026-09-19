@@ -1,13 +1,14 @@
 /// ============================================================================
 /// FILE: lib/features/kosku/services/kosku_service.dart
-/// FUNGSI: Service pengolahan CRUD data transaksi keuangan & kategori dari PostgreSQL.
+/// FUNGSI: Service pengolahan CRUD data transaksi keuangan & kategori via Supabase Client.
 /// MANAJEMEN HANDLES: FR-T2-01 (Summary Dashboard), FR-T2-02 (Input/Create),
 ///                    FR-T2-03 (Delete), & FR-T2-04 (Update)
-/// LOKASI LOGIC: Tempat penulisan SQL query SELECT ringkasan total pemasukan/pengeluaran,
-///               INSERT, UPDATE, DELETE `financial_records` & `categories`.
+/// LOKASI LOGIC: Supabase direct query (`financial_records` & `categories`).
 /// ============================================================================
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/financial_record_model.dart';
 import '../models/category_model.dart';
 import '../../../core/database/database_helper.dart';
@@ -17,7 +18,65 @@ class KoskuService {
 
   /// Handles FR-T2-01: Mengambil ringkasan total pemasukan, total pengeluaran, & saldo
   Future<Map<String, double>> getFinancialSummary(int userId) async {
-    // TODO: Implementasi SQL query SUM(amount) GROUP BY type
+    try {
+      final response = await Supabase.instance.client
+          .from('financial_records')
+          .select('type, amount')
+          .eq('user_id', userId);
+
+      double totalPemasukan = 0.0;
+      double totalPengeluaran = 0.0;
+
+      for (var row in response) {
+        final type = row['type'].toString();
+        final amount = (row['amount'] is num)
+            ? (row['amount'] as num).toDouble()
+            : double.tryParse(row['amount'].toString()) ?? 0.0;
+
+        if (type == 'pemasukan') {
+          totalPemasukan += amount;
+        } else if (type == 'pengeluaran') {
+          totalPengeluaran += amount;
+        }
+      }
+
+      return {
+        'total_pemasukan': totalPemasukan,
+        'total_pengeluaran': totalPengeluaran,
+        'saldo': totalPemasukan - totalPengeluaran,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase getFinancialSummary error: $e');
+      }
+    }
+
+    // Fallback PostgreSQL Direct (Non-Web)
+    if (!kIsWeb) {
+      try {
+        final isConnected = await _dbHelper.initDatabase();
+        if (isConnected) {
+          final rows = await _dbHelper.query(
+            'SELECT type, SUM(amount) as total FROM financial_records WHERE user_id = @userId GROUP BY type',
+            substitutionValues: {'userId': userId},
+          );
+          double totalPemasukan = 0.0;
+          double totalPengeluaran = 0.0;
+          for (var r in rows) {
+            final type = r['type'].toString();
+            final total = (r['total'] is num) ? (r['total'] as num).toDouble() : double.parse(r['total'].toString());
+            if (type == 'pemasukan') totalPemasukan = total;
+            if (type == 'pengeluaran') totalPengeluaran = total;
+          }
+          return {
+            'total_pemasukan': totalPemasukan,
+            'total_pengeluaran': totalPengeluaran,
+            'saldo': totalPemasukan - totalPengeluaran,
+          };
+        }
+      } catch (_) {}
+    }
+
     return {
       'total_pemasukan': 0.0,
       'total_pengeluaran': 0.0,
@@ -27,37 +86,124 @@ class KoskuService {
 
   /// Handles FR-T2-01: Mengambil daftar seluruh transaksi keuangan user
   Future<List<FinancialRecordModel>> getRecords(int userId) async {
-    // TODO: Implementasi SQL SELECT * FROM financial_records WHERE user_id = @userId ORDER BY record_date DESC
+    try {
+      final response = await Supabase.instance.client
+          .from('financial_records')
+          .select()
+          .eq('user_id', userId)
+          .order('record_date', ascending: false);
+
+      return response
+          .map((item) => FinancialRecordModel.fromMap(item))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase getRecords error: $e');
+      }
+    }
     return [];
   }
 
-  /// Handles FR-T2-02: Menambah transaksi baru ke database PostgreSQL
+  /// Handles FR-T2-02: Menambah transaksi baru ke database Supabase
   Future<bool> createRecord(FinancialRecordModel record) async {
-    // TODO: Implementasi SQL INSERT INTO financial_records (...)
-    return false;
+    try {
+      final data = {
+        'user_id': record.userId,
+        if (record.categoryId != null) 'category_id': record.categoryId,
+        'type': record.type,
+        'amount': record.amount,
+        'title': record.title,
+        'description': record.description,
+        'record_date': record.recordDate.toIso8601String().split('T').first,
+      };
+
+      await Supabase.instance.client.from('financial_records').insert(data);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase createRecord error: $e');
+      }
+      return false;
+    }
   }
 
-  /// Handles FR-T2-04: Mengubah/memperbarui data transaksi di PostgreSQL
+  /// Handles FR-T2-04: Mengubah/memperbarui data transaksi di Supabase
   Future<bool> updateRecord(FinancialRecordModel record) async {
-    // TODO: Implementasi SQL UPDATE financial_records SET ... WHERE id = @id
-    return false;
+    if (record.id == null) return false;
+    try {
+      final data = {
+        if (record.categoryId != null) 'category_id': record.categoryId,
+        'type': record.type,
+        'amount': record.amount,
+        'title': record.title,
+        'description': record.description,
+        'record_date': record.recordDate.toIso8601String().split('T').first,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      await Supabase.instance.client
+          .from('financial_records')
+          .update(data)
+          .eq('id', record.id!);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase updateRecord error: $e');
+      }
+      return false;
+    }
   }
 
-  /// Handles FR-T2-03: Menghapus transaksi dari database PostgreSQL
+  /// Handles FR-T2-03: Menghapus transaksi dari database Supabase
   Future<bool> deleteRecord(int recordId) async {
-    // TODO: Implementasi SQL DELETE FROM financial_records WHERE id = @recordId
-    return false;
+    try {
+      await Supabase.instance.client
+          .from('financial_records')
+          .delete()
+          .eq('id', recordId);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase deleteRecord error: $e');
+      }
+      return false;
+    }
   }
 
-  /// Handles FR-T2-02: Mengambil daftar kategori dinamis user dari DB
+  /// Handles FR-T2-02: Mengambil daftar kategori dinamis user dari DB Supabase
   Future<List<CategoryModel>> getCategories(int userId) async {
-    // TODO: Implementasi SQL SELECT * FROM categories WHERE user_id = @userId
+    try {
+      final response = await Supabase.instance.client
+          .from('categories')
+          .select()
+          .eq('user_id', userId)
+          .order('name', ascending: true);
+
+      return response
+          .map((item) => CategoryModel.fromMap(item))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase getCategories error: $e');
+      }
+    }
     return [];
   }
 
-  /// Handles FR-T2-02: Menambah kategori dinamis baru ke DB PostgreSQL
+  /// Handles FR-T2-02: Menambah kategori dinamis baru ke DB Supabase
   Future<bool> createCategory(CategoryModel category) async {
-    // TODO: Implementasi SQL INSERT INTO categories (...)
-    return false;
+    try {
+      await Supabase.instance.client.from('categories').insert({
+        'user_id': category.userId,
+        'name': category.name,
+        'type': category.type,
+      });
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase createCategory error: $e');
+      }
+      return false;
+    }
   }
 }

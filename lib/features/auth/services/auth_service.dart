@@ -1,14 +1,16 @@
 /// ============================================================================
 /// FILE: lib/features/auth/services/auth_service.dart
-/// FUNGSI: Menangani logika autentikasi (Login & Registrasi) dengan PostgreSQL & Hashing SHA-256.
-/// MANAJEMEN HANDLES: FR-U-01 (Login DB) & FR-U-02 (Registrasi DB dengan Hash Password)
-/// LOKASI LOGIC: Enkripsi SHA-256 password, Query SELECT (login) & INSERT RETURNING (register) PostgreSQL,
-///               serta validasi keunikan username & email.
+/// FUNGSI: Menangani logika autentikasi (Login & Registrasi) via Supabase Client & PostgreSQL.
+/// MANAJEMEN HANDLES: FR-U-01 (Login) & FR-U-02 (Registrasi User ke Cloud PostgreSQL Supabase)
+/// LOKASI LOGIC: Supabase Client Direct Table Access (`Supabase.instance.client.from('users')`)
+///               sehingga Flutter Web di Chrome dapat login & registrasi secara online & bebas CORS.
 /// ============================================================================
 
 import 'dart:async';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../../../core/database/database_helper.dart';
 
@@ -27,13 +29,13 @@ class AuthResult {
 class AuthService {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  /// Fungsi Helper Hashing Password menggunakan algoritma SHA-256
+  /// Helper Hashing Password SHA-256
   String hashPassword(String password) {
     final bytes = utf8.encode(password);
     return sha256.convert(bytes).toString();
   }
 
-  /// Handles FR-U-01: Login dengan username & password dari DB PostgreSQL
+  /// Handles FR-U-01: Login User (Online Supabase Cloud PostgreSQL)
   Future<AuthResult> login({
     required String username,
     required String password,
@@ -46,98 +48,176 @@ class AuthService {
       );
     }
 
-    // Pastikan koneksi DB aktif
-    final isConnected = await _dbHelper.initDatabase();
-    if (!isConnected) {
-      return AuthResult(
-        success: false,
-        errorMessage: 'Gagal terhubung ke PostgreSQL DB "${_dbHelper.lastErrorDetail ?? 'Cek Server/Password'}"',
-      );
-    }
-
     final hashedPassword = hashPassword(password);
 
-    // Dynamic SQL Query ke PostgreSQL
-    final rows = await _dbHelper.query(
-      'SELECT id, username, password, email, birth_date, created_at FROM users WHERE username = @username AND password = @password LIMIT 1',
-      substitutionValues: {
-        'username': trimmedUsername,
-        'password': hashedPassword,
-      },
-    );
+    // 1. Coba via Online Supabase Client (Sangat cocok untuk Flutter Web / Chrome)
+    try {
+      final supabase = Supabase.instance.client;
+      final response = await supabase
+          .from('users')
+          .select()
+          .eq('username', trimmedUsername)
+          .maybeSingle();
 
-    if (rows.isNotEmpty) {
-      final user = UserModel.fromMap(rows.first);
-      return AuthResult(success: true, user: user);
+      if (response != null) {
+        final dbPassword = response['password']?.toString() ?? '';
+        // Cocokkan password (baik hashed SHA-256 maupun plaintext legacy)
+        if (dbPassword == hashedPassword || dbPassword == password) {
+          final user = UserModel.fromMap(response);
+          return AuthResult(success: true, user: user);
+        } else {
+          return AuthResult(
+            success: false,
+            errorMessage: 'Password yang Anda masukkan salah!',
+          );
+        }
+      } else {
+        return AuthResult(
+          success: false,
+          errorMessage: 'Username "$trimmedUsername" tidak ditemukan!',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase Login Error: $e');
+      }
+      if (e.toString().contains('YOUR_SUPABASE_PROJECT_ID') || e.toString().contains('Invalid API key')) {
+        return AuthResult(
+          success: false,
+          errorMessage: 'Kredensial Supabase belum diisi! Masukkan SUPABASE_URL dan SUPABASE_ANON_KEY di supabase_config.dart',
+        );
+      }
+    }
+
+    // 2. Fallback Direct TCP PostgreSQL Query (Jika di Native Android/Windows & DB lokal aktif)
+    if (!kIsWeb) {
+      try {
+        final isConnected = await _dbHelper.initDatabase();
+        if (isConnected) {
+          final rows = await _dbHelper.query(
+            'SELECT id, username, password, email, birth_date, created_at FROM users WHERE username = @username AND (password = @password OR password = @plainPassword) LIMIT 1',
+            substitutionValues: {
+              'username': trimmedUsername,
+              'password': hashedPassword,
+              'plainPassword': password,
+            },
+          );
+
+          if (rows.isNotEmpty) {
+            final user = UserModel.fromMap(rows.first);
+            return AuthResult(success: true, user: user);
+          }
+        }
+      } catch (_) {}
     }
 
     return AuthResult(
       success: false,
-      errorMessage: 'Username atau Password salah!',
+      errorMessage: 'Gagal Login. Pastikan koneksi internet aktif dan Supabase URL/Key sudah terkonfigurasi di supabase_config.dart.',
     );
   }
 
-  /// Handles FR-U-02: Registrasi user baru (username, password, email, birth_date) ke DB PostgreSQL
+  /// Handles FR-U-02: Registrasi User Baru ke Supabase Cloud PostgreSQL
   Future<AuthResult> register(UserModel user) async {
-    if (user.username.trim().isEmpty || user.password.isEmpty || user.email.trim().isEmpty) {
+    final trimmedUsername = user.username.trim();
+    final trimmedEmail = user.email.trim();
+
+    if (trimmedUsername.isEmpty || user.password.isEmpty || trimmedEmail.isEmpty) {
       return AuthResult(
         success: false,
         errorMessage: 'Seluruh field registrasi wajib diisi.',
       );
     }
 
-    // Pastikan koneksi DB aktif
-    final isConnected = await _dbHelper.initDatabase();
-    if (!isConnected) {
-      return AuthResult(
-        success: false,
-        errorMessage: 'Tidak terhubung ke database PostgreSQL! Cek koneksi / password DB di tombol Tes DB.',
-      );
-    }
-
-    // 1. Cek keunikan username atau email di database PostgreSQL
-    final existingRows = await _dbHelper.query(
-      'SELECT id FROM users WHERE username = @username OR email = @email LIMIT 1',
-      substitutionValues: {
-        'username': user.username.trim(),
-        'email': user.email.trim(),
-      },
-    );
-
-    if (existingRows.isNotEmpty) {
-      return AuthResult(
-        success: false,
-        errorMessage: 'Username atau Email sudah terdaftar di database!',
-      );
-    }
-
-    // 2. Hash Password dengan SHA-256
-    final hashedPassword = hashPassword(user.password);
     final birthDateStr = user.birthDate.toIso8601String().split('T').first;
+    final hashedPassword = hashPassword(user.password);
 
-    // 3. Simpan ke database PostgreSQL & RETURNING id hasil insert
-    final insertedRows = await _dbHelper.query(
-      '''
-      INSERT INTO users (username, password, email, birth_date)
-      VALUES (@username, @password, @email, @birth_date::date)
-      RETURNING id, username, email, birth_date, created_at
-      ''',
-      substitutionValues: {
-        'username': user.username.trim(),
+    // 1. Coba registrasi via Supabase Client
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Cek apakah username atau email sudah terdaftar
+      final existingUser = await supabase
+          .from('users')
+          .select('id, username, email')
+          .or('username.eq.$trimmedUsername,email.eq.$trimmedEmail')
+          .maybeSingle();
+
+      if (existingUser != null) {
+        final existingUsername = existingUser['username']?.toString();
+        final existingEmail = existingUser['email']?.toString();
+        if (existingUsername?.toLowerCase() == trimmedUsername.toLowerCase()) {
+          return AuthResult(
+            success: false,
+            errorMessage: 'Username "$trimmedUsername" sudah digunakan!',
+          );
+        }
+        if (existingEmail?.toLowerCase() == trimmedEmail.toLowerCase()) {
+          return AuthResult(
+            success: false,
+            errorMessage: 'Email "$trimmedEmail" sudah terdaftar!',
+          );
+        }
+      }
+
+      // Insert ke tabel users Supabase
+      final insertedRows = await supabase.from('users').insert({
+        'username': trimmedUsername,
         'password': hashedPassword,
-        'email': user.email.trim(),
+        'email': trimmedEmail,
         'birth_date': birthDateStr,
-      },
-    );
+      }).select();
 
-    if (insertedRows.isNotEmpty) {
-      final createdUser = UserModel.fromMap(insertedRows.first);
-      return AuthResult(success: true, user: createdUser);
+      if (insertedRows.isNotEmpty) {
+        final createdUser = UserModel.fromMap(insertedRows.first);
+        return AuthResult(success: true, user: createdUser);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('ℹ️ Supabase Register Error: $e');
+      }
+      if (e.toString().contains('YOUR_SUPABASE_PROJECT_ID') || e.toString().contains('Invalid API key')) {
+        return AuthResult(
+          success: false,
+          errorMessage: 'Kredensial Supabase belum diisi di supabase_config.dart!',
+        );
+      }
+      return AuthResult(
+        success: false,
+        errorMessage: 'Gagal registrasi di Supabase: ${e.toString()}',
+      );
+    }
+
+    // 2. Fallback Direct TCP PostgreSQL Query (Jika Native Android/Desktop)
+    if (!kIsWeb) {
+      try {
+        final isConnected = await _dbHelper.initDatabase();
+        if (isConnected) {
+          final insertedRows = await _dbHelper.query(
+            '''
+            INSERT INTO users (username, password, email, birth_date)
+            VALUES (@username, @password, @email, @birth_date::date)
+            RETURNING id, username, email, birth_date, created_at
+            ''',
+            substitutionValues: {
+              'username': trimmedUsername,
+              'password': hashedPassword,
+              'email': trimmedEmail,
+              'birth_date': birthDateStr,
+            },
+          );
+
+          if (insertedRows.isNotEmpty) {
+            final createdUser = UserModel.fromMap(insertedRows.first);
+            return AuthResult(success: true, user: createdUser);
+          }
+        }
+      } catch (_) {}
     }
 
     return AuthResult(
       success: false,
-      errorMessage: 'Gagal memasukkan data ke tabel users di PostgreSQL.',
+      errorMessage: 'Gagal mendaftar ke database. Pastikan koneksi internet aktif.',
     );
   }
 }
