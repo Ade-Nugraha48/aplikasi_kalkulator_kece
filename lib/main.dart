@@ -1,20 +1,32 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 
-import 'theme/app_theme.dart';
-import 'views/login_screen.dart';
+import 'core/theme/app_theme.dart';
+import 'core/database/database_helper.dart';
+import 'core/session/session_manager.dart';
+import 'core/session/session_listener.dart';
+import 'features/auth/views/login_view.dart';
+import 'features/main_navigation/views/main_navigation_view.dart';
 
-export 'models/big_decimal.dart';
-export 'models/calculation_result.dart';
-export 'services/calculator_service.dart';
-export 'views/login_screen.dart';
-export 'views/main_navigation_screen.dart';
-export 'views/calculator_view.dart';
-export 'views/odd_even_view.dart';
-export 'views/statistics_view.dart';
-export 'views/team_view.dart';
+export 'features/calculator/models/big_decimal.dart';
+export 'features/calculator/models/calculation_result.dart';
+export 'features/calculator/services/calculator_service.dart';
+export 'features/auth/views/login_view.dart';
+export 'features/main_navigation/views/main_navigation_view.dart';
+export 'features/calculator/views/calculator_view.dart';
+export 'features/odd_even/views/odd_even_view.dart';
+export 'features/statistics/views/statistics_view.dart';
+export 'features/team/views/team_view.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inisialisasi Database PostgreSQL (non-blocking)
+  DatabaseHelper().initDatabase();
+
+  // Inisialisasi Persistent Session dari SharedPreferences
+  await SessionManager().initSession();
+
   runApp(const AplikasiKalkulatorKece());
 }
 
@@ -23,13 +35,17 @@ class AplikasiKalkulatorKece extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Kalkulator Super',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const HalamanLogin(),
+    final bool sessionActive = SessionManager().isSessionValid();
+
+    return SessionListener(
+      child: MaterialApp(
+        title: 'Aplikasi Tugas 2 Super',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: sessionActive ? const MainNavigationView() : const LoginView(),
+      ),
     );
   }
 }

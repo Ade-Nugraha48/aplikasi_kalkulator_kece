@@ -1,13 +1,2 @@
-// lib/models/team_member.dart
-
-class TeamMember {
-  final String nama;
-  final String nim;
-  final String peranan;
-
-  const TeamMember({
-    required this.nama,
-    required this.nim,
-    this.peranan = 'Anggota Kelompok',
-  });
-}
+/// Re-export file untuk menjaga kompatibilitas mundur dengan unit test dan Tugas 1
+export '../features/team/models/team_member_model.dart';

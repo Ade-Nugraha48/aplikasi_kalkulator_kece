@@ -1,16 +1,2 @@
-// lib/models/calculation_result.dart
-import 'big_decimal.dart';
-
-class HasilKalkulasi {
-  final BigDecimal? nilai;
-  final bool sukses;
-  final String? pesanError;
-
-  HasilKalkulasi.sukses(this.nilai)
-      : sukses = true,
-        pesanError = null;
-
-  HasilKalkulasi.gagal(this.pesanError)
-      : sukses = false,
-        nilai = null;
-}
+/// Re-export file untuk menjaga kompatibilitas mundur dengan unit test dan Tugas 1
+export '../features/calculator/models/calculation_result.dart';
