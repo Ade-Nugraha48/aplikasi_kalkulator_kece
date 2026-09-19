@@ -289,7 +289,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Silakan masuk dengan akun Anda (Supabase Cloud DB)',
+                        'Silakan masuk dengan akun Anda untuk melanjutkan',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),

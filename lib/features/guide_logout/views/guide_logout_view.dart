@@ -170,37 +170,39 @@ class GuideLogoutView extends StatelessWidget {
 
             // 2. Daftar Panduan (Accordion)
             _buildAccordion(
-              'Sistem Keamanan & Session',
+              'Keamanan & Akun',
               Icons.security,
-              'Aplikasi dilengkapi dengan Auto-Logout (Session Timeout). Jika Anda tidak menyentuh layar atau berinteraksi sama sekali selama 1 jam, aplikasi akan secara otomatis memutus sesi Anda demi keamanan data.',
+              '• Login & Registrasi: Divalidasi secara ketat demi keamanan.\n'
+              '• Session Timeout: Aplikasi dilengkapi dengan Auto-Logout. Jika Anda tidak menyentuh layar selama 1 jam, aplikasi akan otomatis memutus sesi Anda demi keamanan data.',
             ),
             _buildAccordion(
-              'Fitur Komputasi (Tugas 1)',
+              'Fitur Komputasi',
               Icons.calculate,
-              '• Kalkulator: Bisa menghitung angka desimal yang luar biasa besar (BigInteger/BigDecimal).\n'
-                  '• Ganjil Genap: Memeriksa sifat angka secara instan.\n'
-                  '• Deret & Statistik: Menampilkan deret matematika dan statistik dasar dari kumpulan angka masukan.',
+              '• Kalkulator: Bisa menghitung angka desimal yang sangat besar.\n'
+              '• Ganjil Genap: Memeriksa sifat angka secara instan.\n'
+              '• Deret Statistik: Menampilkan deret matematika dan statistik dasar dari kumpulan angka masukan.',
             ),
             _buildAccordion(
               'Catatan Keuangan KosKu',
               Icons.account_balance_wallet,
               'Berfungsi mengelola uang Anda.\n'
-                  '• Tambah Catatan: Catat Pemasukan atau Pengeluaran.\n'
-                  '• Kategori: Anda bisa menambahkan kategori Anda sendiri (Fleksibel).\n'
-                  '• Dashboard: Melihat Saldo akhir dan riwayat terurut berdasarkan tanggal terbaru.',
+              '• Tambah Catatan: Catat Pemasukan atau Pengeluaran.\n'
+              '• Kategori: Anda bisa menambahkan kategori Anda sendiri secara dinamis.\n'
+              '• Dashboard: Melihat Saldo akhir dan riwayat terurut berdasarkan tanggal terbaru.',
             ),
             _buildAccordion(
-              'Konversi Waktu & Kalender',
+              'Konversi Penanggalan',
               Icons.calendar_month,
-              '• Kalender Hijriah: Merubah Masehi ke kalender umat Islam.\n'
-                  '• Umur Detail: Menampilkan umur Anda mulai dari Tahun hingga Detik secara real-time!\n'
-                  '• Weton Jawa: Mencari Hari Pasaran Jawa beserta penjelasan watak/karakternya.\n'
-                  '• Saka Bali: Sistem kalender kuno Pawukon dan Wewaran.',
+              '• Hijriah: Mengonversi kalender Masehi ke Hijriah.\n'
+              '• Umur: Menampilkan umur detail Anda secara real-time.\n'
+              '• Weton: Mencari Hari Pasaran Jawa beserta penjelasan wataknya.\n'
+              '• Saka Bali: Menampilkan kalender kuno Pawukon dan Wewaran Bali.',
             ),
             _buildAccordion(
-              'Stopwatch & Navigasi',
+              'Navigasi & Tools',
               Icons.timer,
-              'Stopwatch memiliki resolusi tinggi hingga milidetik. Anda bisa menggunakan fungsi Lap Time. Uniknya, Stopwatch akan tetap berjalan di background walau Anda pindah tab di menu navigasi bawah!',
+              '• Stopwatch: Stopwatch presisi tinggi yang tetap berjalan di latar belakang navigasi.\n'
+              '• Logout: Keluar dari aplikasi dengan aman dan memutus sesi.',
             ),
 
             const SizedBox(height: 32),

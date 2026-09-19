@@ -161,7 +161,7 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9\s,\.\-]')),
                         ],
                         decoration: const InputDecoration(
-                          hintText: 'Ketik deret angka dipisahkan spasi atau koma\n\nContoh: 1000 5000 2500 1000000000',
+                          hintText: 'Ketik deret angka dipisahkan spasi atau koma',
                           alignLabelWithHint: true,
                         ),
                       ),

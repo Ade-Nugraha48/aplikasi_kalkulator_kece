@@ -132,7 +132,7 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
                         onSubmitted: (_) => _cekAngka(),
                         decoration: const InputDecoration(
                           labelText: 'Masukkan Bilangan Bulat',
-                          hintText: 'Contoh: 9876543210123456789',
+                          hintText: 'Masukkan angka',
                           prefixIcon: Icon(Icons.pin),
                         ),
                       ),
@@ -174,7 +174,7 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
                             child: Column(
                               children: [
                                 Icon(
-                                  _isGenap ? Icons.check_circle_outline : Icons.info_outline,
+                                  Icons.check_circle,
                                   size: 40,
                                   color: _statusColor,
                                 ),

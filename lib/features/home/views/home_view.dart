@@ -25,7 +25,7 @@ class HomeView extends StatelessWidget {
     final List<Map<String, dynamic>> menuItems = [
       {
         'title': 'Daftar Anggota Kelompok',
-        'subtitle': 'Tugas 1 (Data dari Supabase Cloud DB)',
+        'subtitle': 'Tugas 1 (Daftar Pengembang Aplikasi)',
         'icon': Icons.group_outlined,
         'page': const TeamView(),
       },
@@ -49,7 +49,7 @@ class HomeView extends StatelessWidget {
       },
       {
         'title': 'Catatan Keuangan KosKu',
-        'subtitle': 'Tugas 2 (Dashboard & CRUD DB)',
+        'subtitle': 'Tugas 2 (Kelola Pemasukan & Pengeluaran)',
         'icon': Icons.account_balance_wallet_outlined,
         'page': const KoskuDashboardView(),
       },

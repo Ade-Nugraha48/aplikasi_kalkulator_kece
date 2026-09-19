@@ -105,8 +105,6 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registrasi Akun Baru'),
@@ -134,7 +132,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Daftar akun untuk menyimpan transaksi KosKu & data di Supabase',
+                        'Buat akun baru untuk mulai menggunakan aplikasi',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
@@ -161,7 +159,11 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) return 'Email wajib diisi.';
-                          if (!val.contains('@')) return 'Format email tidak valid.';
+                          final emailStr = val.trim();
+                          if (emailStr.contains(' ')) return 'Alamat email tidak valid atau mengandung karakter terlarang';
+                          final forbiddenPattern = RegExp(r'[:;()\[\]\"/\\<>?=+,\s]');
+                          if (forbiddenPattern.hasMatch(emailStr)) return 'Alamat email tidak valid atau mengandung karakter terlarang';
+                          if (!emailStr.contains('@')) return 'Format email tidak valid.';
                           return null;
                         },
                       ),
@@ -183,7 +185,15 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         validator: (val) {
                           if (val == null || val.isEmpty) return 'Password wajib diisi.';
-                          if (val.length < 6) return 'Password minimal 6 karakter.';
+                          if (val.contains(' ')) return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
+                          if (val.length < 8) return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
+                          if (!RegExp(r'[A-Z]').hasMatch(val) || !RegExp(r'[a-z]').hasMatch(val) || !RegExp(r'[0-9]').hasMatch(val) || !RegExp(r'[^a-zA-Z0-9\s]').hasMatch(val)) {
+                            return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
+                          }
+                          const blacklist = ['12345678', 'password', 'qwerty', '123456789', 'admin123'];
+                          if (blacklist.contains(val.toLowerCase())) {
+                            return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
+                          }
                           return null;
                         },
                       ),

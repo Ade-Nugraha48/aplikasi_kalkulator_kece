@@ -159,7 +159,7 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9\+\-\*\/\.\(\)\s]')),
                         ],
                         decoration: InputDecoration(
-                          hintText: 'Contoh: 1000 + 500 * (2 - 1)',
+                          hintText: 'Masukkan angka atau ekspresi matematika',
                           labelText: 'Masukkan Ekspresi',
                           suffixIcon: _inputCtrl.text.isNotEmpty
                               ? IconButton(
@@ -170,18 +170,6 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
                                   },
                                 )
                               : const Icon(Icons.edit_note),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            const Text('Contoh: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                            _buildSampleChip('1000 + 500 * (2 - 1)'),
-                            _buildSampleChip('9999999999999999 * 8888888888888888'),
-                            _buildSampleChip('100 / 3'),
-                          ],
                         ),
                       ),
                     ],
@@ -308,20 +296,6 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
         ),
       ),
     ),
-    );
-  }
-
-  Widget _buildSampleChip(String expr) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6.0),
-      child: ActionChip(
-        label: Text(expr, style: const TextStyle(fontSize: 11)),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        onPressed: () {
-          _inputCtrl.text = expr;
-          _hitungRealtime(expr);
-        },
-      ),
     );
   }
 

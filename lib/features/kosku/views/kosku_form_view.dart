@@ -237,9 +237,7 @@ class _KoskuFormViewState extends State<KoskuFormView> {
       );
     }
 
-    final titlePlaceholder = _selectedType == 'pemasukan'
-        ? 'Contoh: Kiriman Ortu Bulan Ini'
-        : 'Contoh: Beli Nasi Goreng Pak Ali';
+    final titlePlaceholder = 'Masukkan judul catatan';
 
     return Scaffold(
       appBar: AppBar(
@@ -292,7 +290,7 @@ class _KoskuFormViewState extends State<KoskuFormView> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(
                   labelText: 'Nominal (Rp)', 
-                  hintText: 'Cth: 15000',
+                  hintText: 'Masukkan nominal (Rp)',
                   border: OutlineInputBorder(),
                   prefixText: 'Rp ',
                 ),
@@ -360,7 +358,7 @@ class _KoskuFormViewState extends State<KoskuFormView> {
                 maxLength: 200,
                 decoration: const InputDecoration(
                   labelText: 'Deskripsi Tambahan (Opsional)', 
-                  hintText: 'Contoh: Nasi goreng + es teh manis (nota ada di dompet)',
+                  hintText: 'Masukkan catatan tambahan (opsional)',
                   border: OutlineInputBorder()
                 ),
               ),
