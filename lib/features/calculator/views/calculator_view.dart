@@ -100,8 +100,12 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kalkulator Presisi'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
@@ -303,6 +307,7 @@ class _ViewKalkulatorState extends State<ViewKalkulator> {
           ),
         ),
       ),
+    ),
     );
   }
 

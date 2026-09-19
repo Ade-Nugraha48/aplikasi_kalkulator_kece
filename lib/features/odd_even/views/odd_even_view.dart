@@ -82,9 +82,13 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Cek Ganjil Genap'),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 550),
           child: Column(
@@ -230,6 +234,7 @@ class _ViewGanjilGenapState extends State<ViewGanjilGenap> {
           ),
         ),
       ),
+    ),
     );
   }
 }

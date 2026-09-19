@@ -19,7 +19,6 @@ class ViewTotalAngka extends StatefulWidget {
 
 class _ViewTotalAngkaState extends State<ViewTotalAngka> {
   final _deretCtrl = TextEditingController();
-  String _hasilAnalisis = '';
   String _errorMessage = '';
   int _totalValidCount = 0;
   String _sumVal = '';
@@ -35,7 +34,6 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
       setState(() {
         _hasResult = false;
         _errorMessage = 'Harap masukkan deret angka terlebih dahulu.';
-        _hasilAnalisis = '';
       });
       return;
     }
@@ -59,7 +57,6 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
         _hasResult = false;
         _errorMessage =
             'Input mengandung data yang bukan angka valid:\n"${invalidTokens.join(', ')}"\n\nHanya angka yang diperbolehkan (pisahkan dengan spasi atau koma).';
-        _hasilAnalisis = '';
       });
       return;
     }
@@ -68,7 +65,6 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
       setState(() {
         _hasResult = false;
         _errorMessage = 'Tidak ada angka valid yang dimasukkan.';
-        _hasilAnalisis = '';
       });
       return;
     }
@@ -94,14 +90,6 @@ class _ViewTotalAngkaState extends State<ViewTotalAngka> {
       _avgVal = average.toFormattedString();
       _minVal = minVal.toFormattedString();
       _maxVal = maxVal.toFormattedString();
-      _hasilAnalisis = '''
-Banyak Angka Valid : ${validNumbers.length}
-
-Total Penjumlahan  : $_sumVal
-Rata-Rata (Average): $_avgVal
-Nilai Terkecil     : $_minVal
-Nilai Terbesar     : $_maxVal
-''';
     });
   }
 
@@ -116,12 +104,16 @@ Nilai Terbesar     : $_maxVal
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hitung Statistik'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Card(
@@ -257,6 +249,7 @@ Nilai Terbesar     : $_maxVal
           ),
         ),
       ),
+    ),
     );
   }
 

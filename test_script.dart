@@ -1,0 +1,1 @@
+import 'lib/features/calculator/models/big_decimal.dart'; void main() { var a = BigDecimal.tryParse('124240190.124240191'); var b = BigDecimal.tryParse('-124240192'); print('a = \'); print('b = \'); print('a * b = \'); print('formatted = \'); }

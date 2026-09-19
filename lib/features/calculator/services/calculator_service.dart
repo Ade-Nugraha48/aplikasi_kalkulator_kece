@@ -16,7 +16,7 @@ class KalkulatorService {
     String trimmed = input.trim();
     if (trimmed.isEmpty) return;
 
-    RegExp tokenRegExp = RegExp(r'(\d+(?:[\.,]\d+)?(?:[eE][+-]?\d+)?|[\+\-\*/\(\)])');
+    RegExp tokenRegExp = RegExp(r'(\d+(?:[\.,]\d*)?(?:[eE][+-]?\d+)?|[\+\-\*/\(\)])');
     Iterable<RegExpMatch> matches = tokenRegExp.allMatches(trimmed);
 
     for (Match m in matches) {
@@ -37,7 +37,16 @@ class KalkulatorService {
           _tokens.add(item);
         }
       } else if (_isOperator(_tokens.last)) {
-        _tokens[_tokens.length - 1] = item;
+        if (item == '-' && (_tokens.last == '*' || _tokens.last == '/')) {
+          _tokens.add(item);
+        } else {
+          if (_tokens.length >= 2 && _isOperator(_tokens[_tokens.length - 2])) {
+            _tokens.removeLast();
+            _tokens[_tokens.length - 1] = item;
+          } else {
+            _tokens[_tokens.length - 1] = item;
+          }
+        }
       } else {
         _tokens.add(item);
       }

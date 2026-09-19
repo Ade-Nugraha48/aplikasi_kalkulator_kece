@@ -38,7 +38,7 @@ class HomeView extends StatelessWidget {
       {
         'title': 'Cek Bilangan Ganjil / Genap',
         'subtitle': 'Tugas 1 (Pemeriksaan Angka)',
-        'icon': Icons.numbers_outlined,
+        'icon': Icons.exposure_outlined,
         'page': const ViewGanjilGenap(),
       },
       {
