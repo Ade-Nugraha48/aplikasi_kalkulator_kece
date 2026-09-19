@@ -1,8 +1,8 @@
 /// ============================================================================
 /// FILE: lib/features/team/models/team_member_model.dart
-/// FUNGSI: Model data representasi tabel `members` PostgreSQL (Tugas 1 -> DB).
-/// MANAJEMEN HANDLES: Data Model untuk FR-U-03 (Daftar Anggota Kelompok dari DB)
-/// LOKASI LOGIC: Atribut nim, name, createdAt, serta converter dari/ke PostgreSQL Map.
+/// FUNGSI: Model data representasi tabel `members` Supabase (Tugas 1 -> DB).
+/// MANAJEMEN HANDLES: Struktur Data Anggota Kelompok
+/// LOKASI LOGIC: Atribut nim, name, createdAt, serta converter dari/ke Map.
 /// ============================================================================
 
 class AnggotaKelompok {
@@ -18,7 +18,7 @@ class AnggotaKelompok {
     this.createdAt,
   });
 
-  /// Factory untuk konversi dari Map PostgreSQL
+  /// Factory untuk konversi dari Map Supabase
   factory AnggotaKelompok.fromMap(Map<String, dynamic> map) {
     return AnggotaKelompok(
       id: map['id'] as int?,
@@ -30,7 +30,7 @@ class AnggotaKelompok {
     );
   }
 
-  /// Konversi ke Map untuk query PostgreSQL
+  /// Konversi ke Map untuk query Supabase
   Map<String, dynamic> toMap() {
     return {
       'id': id,

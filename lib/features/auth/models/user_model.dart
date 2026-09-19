@@ -1,9 +1,9 @@
 /// ============================================================================
 /// FILE: lib/features/auth/models/user_model.dart
-/// FUNGSI: Model data representasi tabel `users` PostgreSQL.
-/// MANAJEMEN HANDLES: Data Model untuk FR-U-01 & FR-U-02
-/// LOKASI LOGIC: Definisi atribut user (id, username, email, birthDate, password),
-///               serta method toMap() dan fromMap() untuk query PostgreSQL.
+/// FUNGSI: Model data representasi tabel `users` Supabase.
+/// MANAJEMEN HANDLES: Struktur Data Autentikasi Pengguna
+/// LOKASI LOGIC: Menyimpan informasi userId, username, password, email, tanggal lahir,
+///               serta method toMap() dan fromMap() untuk query Supabase.
 /// ============================================================================
 
 class UserModel {
@@ -23,7 +23,7 @@ class UserModel {
     this.createdAt,
   });
 
-  /// Mengubah Map dari hasil query PostgreSQL ke objek UserModel
+  /// Mengubah Map dari hasil query Supabase ke objek UserModel
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] as int?,
@@ -39,7 +39,7 @@ class UserModel {
     );
   }
 
-  /// Mengubah objek UserModel ke Map untuk query PostgreSQL INSERT/UPDATE
+  /// Mengubah objek UserModel ke Map untuk query Supabase INSERT/UPDATE
   Map<String, dynamic> toMap() {
     return {
       'id': id,

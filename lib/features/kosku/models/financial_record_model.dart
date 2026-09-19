@@ -1,9 +1,9 @@
 /// ============================================================================
 /// FILE: lib/features/kosku/models/financial_record_model.dart
-/// FUNGSI: Model data representasi tabel `financial_records` PostgreSQL.
-/// MANAJEMEN HANDLES: Model data transaksi Keuangan Anak Kos "KosKu"
-/// LOKASI LOGIC: Atribut id, userId, categoryId, type ('pemasukan'/'pengeluaran'),
-///               amount, title, description, recordDate, serta converter Map PostgreSQL.
+/// FUNGSI: Model data representasi tabel `financial_records` Supabase.
+/// MANAJEMEN HANDLES: Struktur Data Transaksi KosKu
+/// LOKASI LOGIC: Model yang menampung userId, categoryId, type, 
+///               amount, title, description, recordDate, serta converter Map Supabase.
 /// ============================================================================
 
 class FinancialRecordModel {

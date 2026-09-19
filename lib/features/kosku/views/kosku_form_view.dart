@@ -26,7 +26,7 @@ class _KoskuFormViewState extends State<KoskuFormView> {
   String _selectedType = 'pengeluaran'; // Default 'pemasukan' / 'pengeluaran'
 
   void _simpanTransaksi() {
-    // TODO: Handles FR-T2-02 (Create) & FR-T2-04 (Update) transaksi ke DB PostgreSQL
+    // TODO: Handles FR-T2-02 (Create) & FR-T2-04 (Update) transaksi ke DB Supabase
   }
 
   @override
@@ -53,7 +53,7 @@ class _KoskuFormViewState extends State<KoskuFormView> {
                 decoration: const InputDecoration(labelText: 'Nominal (Rp)'),
               ),
               const SizedBox(height: 16),
-              // TODO: Dropdown Kategori Dinamis dari PostgreSQL `categories` table
+              // TODO: Dropdown Kategori Dinamis dari Supabase `categories` table
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Deskripsi (Opsional)'),

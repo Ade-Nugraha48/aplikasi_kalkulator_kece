@@ -1,7 +1,7 @@
 /// ============================================================================
 /// FILE: lib/features/team/views/team_view.dart
 /// FUNGSI: Tampilan Daftar Anggota Kelompok.
-/// MANAJEMEN HANDLES: FR-U-03 (UI Anggota Kelompok dari PostgreSQL)
+/// MANAJEMEN HANDLES: FR-U-03 (UI Anggota Kelompok dari Supabase)
 /// LOKASI LOGIC: Tempat penulisan FutureBuilder untuk menampilkan data dari TeamService.fetchMembers().
 /// ============================================================================
 

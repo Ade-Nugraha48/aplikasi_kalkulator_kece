@@ -25,7 +25,7 @@ class HomeView extends StatelessWidget {
     final List<Map<String, dynamic>> menuItems = [
       {
         'title': 'Daftar Anggota Kelompok',
-        'subtitle': 'Tugas 1 (Data dari PostgreSQL)',
+        'subtitle': 'Tugas 1 (Data dari Supabase Cloud DB)',
         'icon': Icons.group_outlined,
         'page': const TeamView(),
       },

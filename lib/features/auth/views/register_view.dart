@@ -1,7 +1,7 @@
 /// ============================================================================
 /// FILE: lib/features/auth/views/register_view.dart
 /// FUNGSI: Tampilan Halaman Registrasi Pengguna Baru.
-/// MANAJEMEN HANDLES: FR-U-02 (Tampilan & Form Registrasi User ke PostgreSQL)
+/// MANAJEMEN HANDLES: FR-U-02 (Tampilan & Form Registrasi User ke Supabase)
 /// LOKASI LOGIC: Input Username, Email, Password, DatePicker Tanggal Lahir,
 ///               validasi form, dan pemanggilan AuthService.register().
 /// ============================================================================
@@ -134,7 +134,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Daftar akun untuk menyimpan transaksi KosKu & data di PostgreSQL',
+                        'Daftar akun untuk menyimpan transaksi KosKu & data di Supabase',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),

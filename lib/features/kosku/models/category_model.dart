@@ -1,9 +1,9 @@
 /// ============================================================================
 /// FILE: lib/features/kosku/models/category_model.dart
-/// FUNGSI: Model data representasi tabel `categories` PostgreSQL.
-/// MANAJEMEN HANDLES: Model untuk FR-T2-02 (Kategori Pemasukan/Pengeluaran Dinamis DB)
-/// LOKASI LOGIC: Atribut id, userId, name, type ('pemasukan'/'pengeluaran'),
-///               serta method toMap() dan fromMap() untuk query PostgreSQL.
+/// FUNGSI: Model data representasi tabel `categories` Supabase.
+/// MANAJEMEN HANDLES: Struktur Data Kategori Transaksi
+/// LOKASI LOGIC: Menyimpan informasi id, userId, name, type (pemasukan/pengeluaran),
+///               serta method toMap() dan fromMap() untuk query Supabase.
 /// ============================================================================
 
 class CategoryModel {

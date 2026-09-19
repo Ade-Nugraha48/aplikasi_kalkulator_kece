@@ -1,6 +1,6 @@
 /// ============================================================================
 /// FILE: lib/core/database/supabase_config.dart
-/// FUNGSI: Konfigurasi Sentral URL & Anon Key Online Database Supabase (Cloud PostgreSQL).
+/// FUNGSI: Konfigurasi Sentral URL & Anon Key Online Database Supabase.
 /// MANAJEMEN HANDLES: Kredensial Supabase untuk Flutter Web & Cross-platform.
 /// LOKASI LOGIC: Tempat pengguna meletakkan SUPABASE_URL & SUPABASE_ANON_KEY dari Dashboard.
 /// ============================================================================
@@ -14,8 +14,8 @@ class SupabaseConfig {
   static const String keySupabaseAnonKey = 'supabase_config_anon_key';
 
   // Default credentials (Pengguna dapat mengganti via Modal Pengaturan Database)
-  static String _url = 'https://slctjtagvaoyjxoqngly.supabase.co';
-  static String _anonKey = 'sb_publishable_SlbNWVVNhaffetYE6priOA_HZga-phc';
+  static String _url = 'https://safmvkmvqlphykusxmul.supabase.co';
+  static String _anonKey = 'sb_publishable_GPJMPklcBY5Ysutkf8gBsQ_06tpXPUj';
 
   /// Returns cleaned Base URL (menghapus akhiran /rest/v1/ jika ada)
   static String get url {

@@ -11,10 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/financial_record_model.dart';
 import '../models/category_model.dart';
-import '../../../core/database/database_helper.dart';
 
 class KoskuService {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   /// Handles FR-T2-01: Mengambil ringkasan total pemasukan, total pengeluaran, & saldo
   Future<Map<String, double>> getFinancialSummary(int userId) async {
@@ -49,32 +47,6 @@ class KoskuService {
       if (kDebugMode) {
         print('ℹ️ Supabase getFinancialSummary error: $e');
       }
-    }
-
-    // Fallback PostgreSQL Direct (Non-Web)
-    if (!kIsWeb) {
-      try {
-        final isConnected = await _dbHelper.initDatabase();
-        if (isConnected) {
-          final rows = await _dbHelper.query(
-            'SELECT type, SUM(amount) as total FROM financial_records WHERE user_id = @userId GROUP BY type',
-            substitutionValues: {'userId': userId},
-          );
-          double totalPemasukan = 0.0;
-          double totalPengeluaran = 0.0;
-          for (var r in rows) {
-            final type = r['type'].toString();
-            final total = (r['total'] is num) ? (r['total'] as num).toDouble() : double.parse(r['total'].toString());
-            if (type == 'pemasukan') totalPemasukan = total;
-            if (type == 'pengeluaran') totalPengeluaran = total;
-          }
-          return {
-            'total_pemasukan': totalPemasukan,
-            'total_pengeluaran': totalPengeluaran,
-            'saldo': totalPemasukan - totalPengeluaran,
-          };
-        }
-      } catch (_) {}
     }
 
     return {

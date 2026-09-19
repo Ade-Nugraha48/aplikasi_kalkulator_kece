@@ -59,7 +59,7 @@ class GuideLogoutView extends StatelessWidget {
                   'PANDUAN PENGGUNAAN APLIKASI:\n\n'
                   '1. Home: Berisi daftar seluruh menu fitur Tugas 1 & Tugas 2.\n'
                   '2. Stopwatch: Fitur pengukur waktu hitung maju.\n'
-                  '3. KosKu: Catatan transaksi keuangan dengan PostgreSQL.\n'
+                  '3. KosKu: Catatan transaksi keuangan dengan Supabase Cloud.\n'
                   '4. Konversi Kalender: Hijriah, Umur Detail, Weton, & Saka Bali.\n'
                   '5. Session: Auto-logout otomatis jika 1 jam tidak ada aktivitas.',
                 ),

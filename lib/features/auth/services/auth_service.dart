@@ -1,7 +1,7 @@
 /// ============================================================================
 /// FILE: lib/features/auth/services/auth_service.dart
-/// FUNGSI: Menangani logika autentikasi (Login & Registrasi) via Supabase Client & PostgreSQL.
-/// MANAJEMEN HANDLES: FR-U-01 (Login) & FR-U-02 (Registrasi User ke Cloud PostgreSQL Supabase)
+/// FUNGSI: Menangani logika autentikasi (Login & Registrasi) via Supabase Client.
+/// MANAJEMEN HANDLES: FR-U-01 (Login) & FR-U-02 (Registrasi User ke Cloud Supabase)
 /// LOKASI LOGIC: Supabase Client Direct Table Access (`Supabase.instance.client.from('users')`)
 ///               sehingga Flutter Web di Chrome dapat login & registrasi secara online & bebas CORS.
 /// ============================================================================
@@ -12,7 +12,6 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
-import '../../../core/database/database_helper.dart';
 
 class AuthResult {
   final bool success;
@@ -27,7 +26,6 @@ class AuthResult {
 }
 
 class AuthService {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   /// Helper Hashing Password SHA-256
   String hashPassword(String password) {
@@ -35,7 +33,7 @@ class AuthService {
     return sha256.convert(bytes).toString();
   }
 
-  /// Handles FR-U-01: Login User (Online Supabase Cloud PostgreSQL)
+  /// Handles FR-U-01: Login User (Online Supabase Cloud)
   Future<AuthResult> login({
     required String username,
     required String password,
@@ -89,35 +87,13 @@ class AuthService {
       }
     }
 
-    // 2. Fallback Direct TCP PostgreSQL Query (Jika di Native Android/Windows & DB lokal aktif)
-    if (!kIsWeb) {
-      try {
-        final isConnected = await _dbHelper.initDatabase();
-        if (isConnected) {
-          final rows = await _dbHelper.query(
-            'SELECT id, username, password, email, birth_date, created_at FROM users WHERE username = @username AND (password = @password OR password = @plainPassword) LIMIT 1',
-            substitutionValues: {
-              'username': trimmedUsername,
-              'password': hashedPassword,
-              'plainPassword': password,
-            },
-          );
-
-          if (rows.isNotEmpty) {
-            final user = UserModel.fromMap(rows.first);
-            return AuthResult(success: true, user: user);
-          }
-        }
-      } catch (_) {}
-    }
-
     return AuthResult(
       success: false,
-      errorMessage: 'Gagal Login. Pastikan koneksi internet aktif dan Supabase URL/Key sudah terkonfigurasi di supabase_config.dart.',
+      errorMessage: 'Gagal Login. Pastikan koneksi internet aktif dan Supabase URL/Key sudah terkonfigurasi.',
     );
   }
 
-  /// Handles FR-U-02: Registrasi User Baru ke Supabase Cloud PostgreSQL
+  /// Handles FR-U-02: Registrasi User Baru ke Supabase Cloud
   Future<AuthResult> register(UserModel user) async {
     final trimmedUsername = user.username.trim();
     final trimmedEmail = user.email.trim();
@@ -186,33 +162,6 @@ class AuthService {
         success: false,
         errorMessage: 'Gagal registrasi di Supabase: ${e.toString()}',
       );
-    }
-
-    // 2. Fallback Direct TCP PostgreSQL Query (Jika Native Android/Desktop)
-    if (!kIsWeb) {
-      try {
-        final isConnected = await _dbHelper.initDatabase();
-        if (isConnected) {
-          final insertedRows = await _dbHelper.query(
-            '''
-            INSERT INTO users (username, password, email, birth_date)
-            VALUES (@username, @password, @email, @birth_date::date)
-            RETURNING id, username, email, birth_date, created_at
-            ''',
-            substitutionValues: {
-              'username': trimmedUsername,
-              'password': hashedPassword,
-              'email': trimmedEmail,
-              'birth_date': birthDateStr,
-            },
-          );
-
-          if (insertedRows.isNotEmpty) {
-            final createdUser = UserModel.fromMap(insertedRows.first);
-            return AuthResult(success: true, user: createdUser);
-          }
-        }
-      } catch (_) {}
     }
 
     return AuthResult(
