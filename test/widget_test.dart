@@ -1,8 +1,8 @@
-// test/widget_test.dart
+﻿// test/widget_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:aplikasi_kalkulator_kece/main.dart'; // Sesuaikan dengan nama project Anda
+import 'package:oneforall/main.dart'; // Sesuaikan dengan nama project Anda
 
 void main() {
   testWidgets('Aplikasi dapat memuat Halaman Login', (WidgetTester tester) async {

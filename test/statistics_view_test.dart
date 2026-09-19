@@ -1,7 +1,7 @@
-// test/statistics_view_test.dart
+﻿// test/statistics_view_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aplikasi_kalkulator_kece/views/statistics_view.dart';
+import 'package:oneforall/views/statistics_view.dart';
 
 void main() {
   testWidgets('ViewTotalAngka memperhitungkan statistik deret angka dengan benar', (WidgetTester tester) async {

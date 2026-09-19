@@ -1,4 +1,4 @@
-# DOKUMENTASI PROYEK: APLIKASI KALKULATOR KECE & KOSKU
+# DOKUMENTASI PROYEK: OneForAll & KOSKU
 
 Laporan proyek ini merupakan dokumentasi komprehensif dari proses perancangan, pengembangan, serta implementasi akhir aplikasi mobile **Kalkulator Kece & KosKu**. Aplikasi ini dikembangkan untuk memenuhi berbagai kebutuhan utilitas harian dan komputasi mahasiswa, mencakup manajemen keuangan, konversi kalender lokal dan internasional, hingga alat matematika presisi tinggi.
 
@@ -19,8 +19,8 @@ Proyek ini dibangun menggunakan **Flutter** dan **Supabase** (Backend-as-a-Servi
 ### 1.2 Langkah Inisiasi Project Flutter
 Inisiasi proyek dimulai dengan perintah dasar pembuatan kerangka aplikasi:
 ```bash
-flutter create aplikasi_kalkulator_kece
-cd aplikasi_kalkulator_kece
+flutter create oneforall
+cd oneforall
 ```
 
 ### 1.3 Konfigurasi Supabase (Cloud Database & Storage)

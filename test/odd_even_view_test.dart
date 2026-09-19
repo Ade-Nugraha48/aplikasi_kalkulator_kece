@@ -1,7 +1,7 @@
-// test/odd_even_view_test.dart
+﻿// test/odd_even_view_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aplikasi_kalkulator_kece/views/odd_even_view.dart';
+import 'package:oneforall/views/odd_even_view.dart';
 
 void main() {
   testWidgets('ViewGanjilGenap memeriksa angka genap dengan benar', (WidgetTester tester) async {
