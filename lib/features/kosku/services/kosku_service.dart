@@ -86,7 +86,7 @@ class KoskuService {
         'amount': record.amount,
         'title': record.title,
         'description': record.description,
-        'record_date': record.recordDate.toIso8601String().split('T').first,
+        'record_date': record.recordDate.toIso8601String(),
       };
 
       await Supabase.instance.client.from('financial_records').insert(data);
@@ -109,7 +109,7 @@ class KoskuService {
         'amount': record.amount,
         'title': record.title,
         'description': record.description,
-        'record_date': record.recordDate.toIso8601String().split('T').first,
+        'record_date': record.recordDate.toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
 
