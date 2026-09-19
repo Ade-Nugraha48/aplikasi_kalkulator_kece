@@ -86,9 +86,14 @@ class GuideLogoutView extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         childrenPadding: const EdgeInsets.all(16),
+        expandedAlignment: Alignment.centerLeft,
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(content, style: const TextStyle(height: 1.5, fontSize: 14)),
+          Text(
+            content,
+            style: const TextStyle(height: 1.5, fontSize: 14),
+            textAlign: TextAlign.left,
+          ),
         ],
       ),
     );
