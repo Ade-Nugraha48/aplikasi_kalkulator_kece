@@ -8,6 +8,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/session/session_manager.dart';
 import '../../auth/views/login_view.dart';
 
@@ -26,7 +27,9 @@ class GuideLogoutView extends StatelessWidget {
             Text('Konfirmasi Logout'),
           ],
         ),
-        content: const Text('Apakah Anda yakin ingin keluar dari aplikasi? Session Anda akan diakhiri secara permanen dari perangkat ini.'),
+        content: const Text(
+          'Apakah Anda yakin ingin keluar dari aplikasi? Session Anda akan diakhiri secara permanen dari perangkat ini.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -40,7 +43,7 @@ class GuideLogoutView extends StatelessWidget {
             onPressed: () async {
               // Tutup dialog
               Navigator.pop(dialogContext);
-              
+
               // 1. Hapus token di server (Supabase)
               try {
                 await Supabase.instance.client.auth.signOut();
@@ -48,10 +51,10 @@ class GuideLogoutView extends StatelessWidget {
                 // Ignore error if offline, local cleanup is priority
                 debugPrint('Supabase sign out error (offline?): $e');
               }
-              
+
               // 2. Hapus Session Lokal (Secure cleanup)
               SessionManager().clearSession();
-              
+
               // 3. Clear Back Stack (Route false)
               if (context.mounted) {
                 Navigator.pushAndRemoveUntil(
@@ -78,7 +81,10 @@ class GuideLogoutView extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: ExpansionTile(
         leading: Icon(icon, color: Colors.teal),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         childrenPadding: const EdgeInsets.all(16),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,13 +97,11 @@ class GuideLogoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final username = SessionManager().username ?? 'Pengguna Anonim';
-    final email = SessionManager().email ?? 'email.tidak.tersedia@kosku.com';
+    final username = SessionManager().currentUser?['username'] ?? 'Pengguna Anonim';
+    final email = SessionManager().currentUser?['email'] ?? 'email.tidak.tersedia@kosku.com';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil & Panduan'),
-      ),
+      appBar: AppBar(title: const Text('Profil & Panduan')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -107,7 +111,9 @@ class GuideLogoutView extends StatelessWidget {
             Card(
               color: theme.colorScheme.primaryContainer,
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
@@ -115,7 +121,11 @@ class GuideLogoutView extends StatelessWidget {
                     CircleAvatar(
                       radius: 30,
                       backgroundColor: theme.colorScheme.onPrimaryContainer,
-                      child: Icon(Icons.person, size: 40, color: theme.colorScheme.primaryContainer),
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: theme.colorScheme.primaryContainer,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -125,7 +135,7 @@ class GuideLogoutView extends StatelessWidget {
                           Text(
                             username,
                             style: TextStyle(
-                              fontSize: 20, 
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.onPrimaryContainer,
                             ),
@@ -135,7 +145,8 @@ class GuideLogoutView extends StatelessWidget {
                             email,
                             style: TextStyle(
                               fontSize: 14,
-                              color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                              color: theme.colorScheme.onPrimaryContainer
+                                  .withOpacity(0.8),
                             ),
                           ),
                         ],
@@ -145,7 +156,7 @@ class GuideLogoutView extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 24),
             Text(
               'Panduan Penggunaan Aplikasi',
@@ -156,44 +167,44 @@ class GuideLogoutView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // 2. Daftar Panduan (Accordion)
             _buildAccordion(
-              'Sistem Keamanan & Session', 
-              Icons.security, 
-              'Aplikasi dilengkapi dengan Auto-Logout (Session Timeout). Jika Anda tidak menyentuh layar atau berinteraksi sama sekali selama 1 jam, aplikasi akan secara otomatis memutus sesi Anda demi keamanan data.'
+              'Sistem Keamanan & Session',
+              Icons.security,
+              'Aplikasi dilengkapi dengan Auto-Logout (Session Timeout). Jika Anda tidak menyentuh layar atau berinteraksi sama sekali selama 1 jam, aplikasi akan secara otomatis memutus sesi Anda demi keamanan data.',
             ),
             _buildAccordion(
-              'Fitur Komputasi (Tugas 1)', 
-              Icons.calculate, 
+              'Fitur Komputasi (Tugas 1)',
+              Icons.calculate,
               '• Kalkulator: Bisa menghitung angka desimal yang luar biasa besar (BigInteger/BigDecimal).\n'
-              '• Ganjil Genap: Memeriksa sifat angka secara instan.\n'
-              '• Deret & Statistik: Menampilkan deret matematika dan statistik dasar dari kumpulan angka masukan.'
+                  '• Ganjil Genap: Memeriksa sifat angka secara instan.\n'
+                  '• Deret & Statistik: Menampilkan deret matematika dan statistik dasar dari kumpulan angka masukan.',
             ),
             _buildAccordion(
-              'Catatan Keuangan KosKu', 
-              Icons.account_balance_wallet, 
+              'Catatan Keuangan KosKu',
+              Icons.account_balance_wallet,
               'Berfungsi mengelola uang Anda.\n'
-              '• Tambah Catatan: Catat Pemasukan atau Pengeluaran.\n'
-              '• Kategori: Anda bisa menambahkan kategori Anda sendiri (Fleksibel).\n'
-              '• Dashboard: Melihat Saldo akhir dan riwayat terurut berdasarkan tanggal terbaru.'
+                  '• Tambah Catatan: Catat Pemasukan atau Pengeluaran.\n'
+                  '• Kategori: Anda bisa menambahkan kategori Anda sendiri (Fleksibel).\n'
+                  '• Dashboard: Melihat Saldo akhir dan riwayat terurut berdasarkan tanggal terbaru.',
             ),
             _buildAccordion(
-              'Konversi Waktu & Kalender', 
-              Icons.calendar_month, 
+              'Konversi Waktu & Kalender',
+              Icons.calendar_month,
               '• Kalender Hijriah: Merubah Masehi ke kalender umat Islam.\n'
-              '• Umur Detail: Menampilkan umur Anda mulai dari Tahun hingga Detik secara real-time!\n'
-              '• Weton Jawa: Mencari Hari Pasaran Jawa beserta penjelasan watak/karakternya.\n'
-              '• Saka Bali: Sistem kalender kuno Pawukon dan Wewaran.'
+                  '• Umur Detail: Menampilkan umur Anda mulai dari Tahun hingga Detik secara real-time!\n'
+                  '• Weton Jawa: Mencari Hari Pasaran Jawa beserta penjelasan watak/karakternya.\n'
+                  '• Saka Bali: Sistem kalender kuno Pawukon dan Wewaran.',
             ),
             _buildAccordion(
-              'Stopwatch & Navigasi', 
-              Icons.timer, 
-              'Stopwatch memiliki resolusi tinggi hingga milidetik. Anda bisa menggunakan fungsi Lap Time. Uniknya, Stopwatch akan tetap berjalan di background walau Anda pindah tab di menu navigasi bawah!'
+              'Stopwatch & Navigasi',
+              Icons.timer,
+              'Stopwatch memiliki resolusi tinggi hingga milidetik. Anda bisa menggunakan fungsi Lap Time. Uniknya, Stopwatch akan tetap berjalan di background walau Anda pindah tab di menu navigasi bawah!',
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // 3. Tombol Logout Penuh
             SizedBox(
               width: double.infinity,
@@ -203,11 +214,16 @@ class GuideLogoutView extends StatelessWidget {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                   elevation: 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () => _konfirmasiLogout(context),
                 icon: const Icon(Icons.power_settings_new, size: 24),
-                label: const Text('Keluar dari Aplikasi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'Keluar dari Aplikasi',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 24),
