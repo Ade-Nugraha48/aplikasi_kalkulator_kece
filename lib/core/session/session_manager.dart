@@ -22,6 +22,7 @@ class SessionManager {
   static const String keyUsername = 'session_username';
   static const String keyEmail = 'session_email';
   static const String keyBirthDate = 'session_birth_date';
+  static const String keyAvatarUrl = 'session_avatar_url';
   static const String keyLastActivity = 'session_last_activity';
 
   Timer? _inactivityTimer;
@@ -38,6 +39,7 @@ class SessionManager {
     final username = prefs.getString(keyUsername);
     final email = prefs.getString(keyEmail);
     final birthDateStr = prefs.getString(keyBirthDate);
+    final avatarUrlStr = prefs.getString(keyAvatarUrl);
     final lastActivityMs = prefs.getInt(keyLastActivity);
 
     if (userId != null && username != null && lastActivityMs != null) {
@@ -50,6 +52,7 @@ class SessionManager {
           'username': username,
           'email': email ?? '',
           'birth_date': birthDateStr ?? '',
+          'avatar_url': avatarUrlStr ?? '',
         };
         _lastActivityTime = DateTime.now();
         resetInactivityTimer();
@@ -73,6 +76,9 @@ class SessionManager {
     if (user['email'] != null) await prefs.setString(keyEmail, user['email'].toString());
     if (user['birth_date'] != null) {
       await prefs.setString(keyBirthDate, user['birth_date'].toString());
+    }
+    if (user['avatar_url'] != null) {
+      await prefs.setString(keyAvatarUrl, user['avatar_url'].toString());
     }
     await prefs.setInt(keyLastActivity, _lastActivityTime!.millisecondsSinceEpoch);
 
@@ -118,7 +124,17 @@ class SessionManager {
     await prefs.remove(keyUsername);
     await prefs.remove(keyEmail);
     await prefs.remove(keyBirthDate);
+    await prefs.remove(keyAvatarUrl);
     await prefs.remove(keyLastActivity);
+  }
+
+  /// Update avatar URL secara real-time
+  Future<void> updateAvatarUrl(String url) async {
+    if (_currentUser != null) {
+      _currentUser!['avatar_url'] = url;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(keyAvatarUrl, url);
+    }
   }
 
   /// Getter user aktif yang sedang login

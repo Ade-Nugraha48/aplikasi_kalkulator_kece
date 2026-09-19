@@ -7,13 +7,92 @@
 /// ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/session/session_manager.dart';
+import '../../../core/services/storage_service.dart';
 import '../../auth/views/login_view.dart';
 
-class GuideLogoutView extends StatelessWidget {
+class GuideLogoutView extends StatefulWidget {
   const GuideLogoutView({super.key});
+
+  @override
+  State<GuideLogoutView> createState() => _GuideLogoutViewState();
+}
+
+class _GuideLogoutViewState extends State<GuideLogoutView> {
+  bool _isUploadingAvatar = false;
+  final ImagePicker _picker = ImagePicker();
+  final StorageService _storageService = StorageService();
+
+  Future<void> _pickAndUploadImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile == null) return;
+
+      setState(() {
+        _isUploadingAvatar = true;
+      });
+
+      final user = SessionManager().currentUser;
+      if (user == null || user['id'] == null) {
+        throw Exception("Session tidak valid");
+      }
+
+      final oldUrl = user['avatar_url']?.toString() ?? '';
+      final bytes = await pickedFile.readAsBytes();
+
+      final publicUrl = await _storageService.uploadAvatar(
+        userId: user['id'] as int,
+        fileBytes: bytes,
+        fileName: pickedFile.name,
+        oldAvatarUrl: oldUrl,
+      );
+
+      if (publicUrl != null) {
+        await SessionManager().updateAvatarUrl(publicUrl);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Foto profil berhasil diperbarui')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingAvatar = false;
+        });
+      }
+    }
+  }
+
+  void _tampilkanOpsiGantiFoto() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndUploadImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _konfirmasiLogout(BuildContext context) {
     showDialog(
@@ -102,8 +181,10 @@ class GuideLogoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final username = SessionManager().currentUser?['username'] ?? 'Pengguna Anonim';
-    final email = SessionManager().currentUser?['email'] ?? 'email.tidak.tersedia@kosku.com';
+    final user = SessionManager().currentUser;
+    final username = user?['username']?.toString() ?? 'Pengguna Anonim';
+    final email = user?['email']?.toString() ?? 'email.tidak.tersedia@kosku.com';
+    final avatarUrl = user?['avatar_url']?.toString() ?? '';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profil & Panduan')),
@@ -123,14 +204,41 @@ class GuideLogoutView extends StatelessWidget {
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: theme.colorScheme.onPrimaryContainer,
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: theme.colorScheme.primaryContainer,
-                      ),
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: theme.colorScheme.onPrimaryContainer,
+                          backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
+                          child: avatarUrl.isEmpty
+                              ? Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: theme.colorScheme.primaryContainer,
+                                )
+                              : null,
+                        ),
+                        if (_isUploadingAvatar)
+                          const Positioned.fill(
+                            child: CircularProgressIndicator(),
+                          ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: GestureDetector(
+                            onTap: _isUploadingAvatar ? null : _tampilkanOpsiGantiFoto,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: theme.colorScheme.primaryContainer, width: 2),
+                              ),
+                              child: Icon(Icons.camera_alt, size: 14, color: theme.colorScheme.onPrimary),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(width: 16),
                     Expanded(
