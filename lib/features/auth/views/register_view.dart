@@ -186,7 +186,7 @@ class _RegisterViewState extends State<RegisterView> {
                         validator: (val) {
                           if (val == null || val.isEmpty) return 'Password wajib diisi.';
                           if (val.contains(' ')) return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
-                          if (val.length < 8) return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
+                          if (val.length < 8) return 'Min. 8 karakter, huruf besar, kecil, angka, simbol, tanpa spasi.';
                           if (!RegExp(r'[A-Z]').hasMatch(val) || !RegExp(r'[a-z]').hasMatch(val) || !RegExp(r'[0-9]').hasMatch(val) || !RegExp(r'[^a-zA-Z0-9\s]').hasMatch(val)) {
                             return 'Password minimal 8 karakter, kombinasi huruf besar, huruf kecil, angka, dan simbol tanpa spasi';
                           }
